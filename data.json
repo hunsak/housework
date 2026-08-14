@@ -1,4 +1,13 @@
 {
-  "tasks": [],
+  "tasks": [
+    {
+      "id": "mst391cnxf8z5",
+      "name": "세탁기 세탁조청소,통살균",
+      "category": "",
+      "memo": "",
+      "intervalDays": 30,
+      "createdAt": "2026-08-15"
+    }
+  ],
   "completions": []
 }
