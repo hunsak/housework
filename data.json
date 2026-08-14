@@ -7,6 +7,30 @@
       "memo": "",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
+    },
+    {
+      "id": "mst39txy4sdbk",
+      "name": "식세기 통살균",
+      "category": "",
+      "memo": "과탄산소다 만 사용",
+      "intervalDays": 30,
+      "createdAt": "2026-08-15"
+    },
+    {
+      "id": "mst3a9ujtf5an",
+      "name": "건조기 통살균 콘덴서케어",
+      "category": "",
+      "memo": "",
+      "intervalDays": 60,
+      "createdAt": "2026-08-15"
+    },
+    {
+      "id": "mst3ay27i6q2f",
+      "name": "로봇청소기 먼지봉투교체",
+      "category": "",
+      "memo": "",
+      "intervalDays": 180,
+      "createdAt": "2026-08-15"
     }
   ],
   "completions": []
