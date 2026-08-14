@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>정비일지</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="정비일지">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1C1F26">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1C1F26;
+    --surface:#242833;
+    --surface-2:#2C313D;
+    --border:#3A4050;
+    --text:#E8E4D9;
+    --text-muted:#8A8F9C;
+    --brass:#C9A227;
+    --rust:#B5533C;
+    --sage:#6B8F71;
+    --sage-dim:#4E6B54;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    padding-bottom:env(safe-area-inset-bottom);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px 100px;}
+
+  header.top{
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(180deg,var(--bg) 80%,transparent);
+    padding:calc(env(safe-area-inset-top) + 18px) 16px 10px;
+    max-width:640px;margin:0 auto;
+  }
+  .top-row{display:flex;justify-content:space-between;align-items:flex-end;}
+  h1{
+    font-family:'Roboto Slab',serif;
+    font-size:22px;font-weight:700;margin:0;
+    letter-spacing:0.3px;
+  }
+  .today{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--text-muted);
+    font-size:12px;margin-top:4px;
+  }
+  .icon-btn{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text-muted);
+    width:38px;height:38px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;cursor:pointer;
+  }
+  .icon-btn:active{background:var(--surface-2);}
+
+  .stats-strip{
+    display:flex;gap:8px;margin-top:14px;
+  }
+  .stat-chip{
+    flex:1;background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:9px 10px;text-align:center;
+  }
+  .stat-chip .n{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
+  .stat-chip .l{font-size:10px;color:var(--text-muted);margin-top:2px;}
+  .stat-chip.overdue .n{color:var(--rust);}
+  .stat-chip.soon .n{color:var(--brass);}
+  .stat-chip.ok .n{color:var(--sage);}
+
+  .filter-row{
+    display:flex;gap:6px;overflow-x:auto;margin:14px 0 4px;padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .filter-row::-webkit-scrollbar{display:none;}
+  .filter-chip{
+    flex:none;padding:6px 12px;border-radius:20px;font-size:12px;
+    background:var(--surface);border:1px solid var(--border);color:var(--text-muted);
+    cursor:pointer;white-space:nowrap;
+  }
+  .filter-chip.active{background:var(--brass);border-color:var(--brass);color:#1C1F26;font-weight:600;}
+
+  .task-list{margin-top:10px;display:flex;flex-direction:column;gap:10px;}
+
+  .task-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:14px 14px 12px;
+    position:relative;
+    overflow:hidden;
+  }
+  .task-card.overdue{border-color:rgba(181,83,60,0.5);}
+  .task-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .task-name{font-size:15.5px;font-weight:600;line-height:1.35;}
+  .task-cat{
+    display:inline-block;font-size:10.5px;color:var(--text-muted);
+    background:var(--surface-2);border-radius:6px;padding:1px 6px;margin-top:5px;
+  }
+  .status-badge{
+    font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;flex:none;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .status-badge.overdue{background:rgba(181,83,60,0.18);color:var(--rust);}
+  .status-badge.soon{background:rgba(201,162,39,0.18);color:var(--brass);}
+  .status-badge.ok{background:rgba(107,143,113,0.18);color:var(--sage);}
+  .status-badge.never{background:rgba(138,143,156,0.18);color:var(--text-muted);}
+
+  .gauge{
+    height:5px;border-radius:3px;background:var(--surface-2);margin-top:11px;overflow:hidden;
+  }
+  .gauge-fill{height:100%;border-radius:3px;transition:width .3s;}
+  .gauge-fill.overdue{background:var(--rust);}
+  .gauge-fill.soon{background:var(--brass);}
+  .gauge-fill.ok{background:var(--sage);}
+
+  .task-meta{
+    display:flex;justify-content:space-between;align-items:center;margin-top:9px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);
+  }
+
+  .task-actions{display:flex;gap:8px;margin-top:12px;}
+  .btn{
+    border:none;border-radius:9px;padding:9px 0;font-size:13px;font-weight:600;
+    cursor:pointer;flex:1;text-align:center;font-family:'Inter',sans-serif;
+  }
+  .btn-done{background:var(--sage);color:#12140F;}
+  .btn-done:active{background:var(--sage-dim);}
+  .btn-hist{background:var(--surface-2);color:var(--text);border:1px solid var(--border);flex:0 0 44px;}
+
+  .empty{
+    text-align:center;color:var(--text-muted);padding:60px 20px;font-size:13.5px;line-height:1.7;
+  }
+  .empty b{color:var(--text);display:block;font-family:'Roboto Slab',serif;font-size:17px;margin-bottom:8px;}
+
+  .fab{
+    position:fixed;right:20px;bottom:calc(24px + env(safe-area-inset-bottom));
+    width:56px;height:56px;border-radius:50%;
+    background:var(--brass);color:#1C1F26;border:none;
+    font-size:26px;box-shadow:0 6px 18px rgba(0,0,0,0.4);
+    cursor:pointer;z-index:30;
+  }
+
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:50;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .overlay.show{display:flex;}
+  .sheet{
+    background:var(--surface);width:100%;max-width:640px;
+    border-radius:18px 18px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom));
+    max-height:86vh;overflow-y:auto;
+    animation:slideup .22s ease-out;
+  }
+  @keyframes slideup{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .sheet h2{
+    font-family:'Roboto Slab',serif;font-size:18px;margin:0 0 16px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .sheet h2 span.close{color:var(--text-muted);font-size:22px;cursor:pointer;font-family:sans-serif;}
+  label{display:block;font-size:12px;color:var(--text-muted);margin:14px 0 6px;}
+  label:first-of-type{margin-top:0;}
+  input[type=text], input[type=number], input[type=date], input[type=password], select{
+    width:100%;background:var(--surface-2);border:1px solid var(--border);
+    color:var(--text);border-radius:9px;padding:11px 12px;font-size:14.5px;
+    font-family:'Inter',sans-serif;
+  }
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+  .unit-toggle{display:flex;gap:6px;margin-top:6px;}
+  .unit-btn{
+    flex:1;padding:8px 0;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface-2);color:var(--text-muted);text-align:center;font-size:12.5px;cursor:pointer;
+  }
+  .unit-btn.active{background:var(--brass);border-color:var(--brass);color:#1C1F26;font-weight:700;}
+  .sheet-actions{display:flex;gap:10px;margin-top:20px;}
+  .btn-primary{background:var(--brass);color:#1C1F26;}
+  .btn-secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+  .btn-danger{background:transparent;color:var(--rust);border:1px solid rgba(181,83,60,0.4);}
+
+  .stamp-flash{
+    position:fixed;inset:0;z-index:60;pointer-events:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .stamp-flash .mark{
+    font-family:'Roboto Slab',serif;font-weight:700;font-size:15px;letter-spacing:2px;
+    color:var(--sage);border:3px solid var(--sage);border-radius:10px;
+    padding:10px 22px;transform:rotate(-8deg) scale(0.6);opacity:0;
+    animation:stampIn .5s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  @keyframes stampIn{
+    0%{transform:rotate(-8deg) scale(2.2);opacity:0;}
+    35%{transform:rotate(-8deg) scale(0.92);opacity:1;}
+    55%{transform:rotate(-8deg) scale(1.05);}
+    75%{transform:rotate(-8deg) scale(1);}
+    100%{transform:rotate(-8deg) scale(1);opacity:0;}
+  }
+
+  .hist-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;border-bottom:1px solid var(--border);
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+  }
+  .hist-item:last-child{border-bottom:none;}
+  .hist-del{color:var(--rust);font-size:16px;cursor:pointer;font-family:sans-serif;padding:2px 6px;}
+  .hist-summary{
+    display:flex;gap:10px;margin-bottom:14px;
+  }
+  .hist-summary .box{
+    flex:1;background:var(--surface-2);border-radius:10px;padding:10px;text-align:center;
+  }
+  .hist-summary .box .n{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;}
+  .hist-summary .box .l{font-size:10px;color:var(--text-muted);margin-top:3px;}
+
+  .sync-status{font-size:11px;color:var(--text-muted);text-align:center;margin-top:10px;font-family:'JetBrains Mono',monospace;}
+  .sync-status.err{color:var(--rust);}
+  .sync-status.ok{color:var(--sage);}
+
+  ::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-row">
+    <div>
+      <h1>정비일지</h1>
+      <div class="today" id="todayLabel"></div>
+    </div>
+    <button class="icon-btn" id="settingsBtn" aria-label="설정">⚙</button>
+  </div>
+  <div class="stats-strip" id="statsStrip"></div>
+  <div class="filter-row" id="filterRow"></div>
+</header>
+
+<div class="wrap">
+  <div class="task-list" id="taskList"></div>
+</div>
+
+<button class="fab" id="addFab" aria-label="항목 추가">＋</button>
+
+<!-- 항목 추가/수정 시트 -->
+<div class="overlay" id="taskOverlay">
+  <div class="sheet">
+    <h2><span id="taskSheetTitle">새 항목</span><span class="close" data-close="taskOverlay">×</span></h2>
+    <label>이름</label>
+    <input type="text" id="f_name" placeholder="예: 에어컨 필터 청소">
+    <label>분류 (선택)</label>
+    <input type="text" id="f_cat" placeholder="예: 청소 / 필터 / 점검">
+    <label>반복 주기</label>
+    <div class="row2">
+      <div><input type="number" id="f_interval" min="1" value="1" inputmode="numeric"></div>
+      <div>
+        <div class="unit-toggle">
+          <div class="unit-btn active" data-unit="7">주</div>
+          <div class="unit-btn" data-unit="30">개월</div>
+          <div class="unit-btn" data-unit="1">일</div>
+        </div>
+      </div>
+    </div>
+    <label>메모 (선택)</label>
+    <input type="text" id="f_memo" placeholder="예: 필터 규격, 구매처 등">
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" data-close="taskOverlay" style="flex:1">취소</button>
+      <button class="btn btn-primary" id="saveTaskBtn" style="flex:2">저장</button>
+    </div>
+    <div class="sheet-actions" id="deleteTaskRow" style="display:none;">
+      <button class="btn btn-danger" id="deleteTaskBtn" style="flex:1">이 항목 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 이력 시트 -->
+<div class="overlay" id="histOverlay">
+  <div class="sheet">
+    <h2><span id="histSheetTitle">이력</span><span class="close" data-close="histOverlay">×</span></h2>
+    <div class="hist-summary" id="histSummary"></div>
+    <label>완료 날짜 추가</label>
+    <div class="row2">
+      <div><input type="date" id="f_histdate"></div>
+      <div><button class="btn btn-primary" id="addHistBtn" style="width:100%;height:100%;">추가</button></div>
+    </div>
+    <label style="margin-top:18px;">기록</label>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<!-- 설정 시트 -->
+<div class="overlay" id="settingsOverlay">
+  <div class="sheet">
+    <h2>설정<span class="close" data-close="settingsOverlay">×</span></h2>
+    <label>GitHub Personal Access Token</label>
+    <input type="password" id="s_token" placeholder="repo 권한 포함 토큰">
+    <label>저장소 (owner/repo)</label>
+    <input type="text" id="s_repo" placeholder="예: hunsak/household-log">
+    <label>브랜치</label>
+    <input type="text" id="s_branch" placeholder="main" value="main">
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" id="testSyncBtn" style="flex:1">연결 확인 &amp; 저장</button>
+      <button class="btn btn-primary" id="pullSyncBtn" style="flex:1">지금 불러오기</button>
+    </div>
+    <div class="sync-status" id="syncStatus"></div>
+  </div>
+</div>
+
+<div class="stamp-flash" id="stampFlash"></div>
+
+<script>
+/* ---------- 상태 ---------- */
+const LS_DATA = 'household-log-data-v1';
+const LS_SETTINGS = 'household-log-settings-v1';
+
+let state = loadLocal();
+let currentFilter = 'all';
+let editingTaskId = null;
+let historyTaskId = null;
+let intervalUnit = 7; // days per unit, default 주
+
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(LS_DATA);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { tasks: [], completions: [] };
+}
+function saveLocal(){
+  localStorage.setItem(LS_DATA, JSON.stringify(state));
+}
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(LS_SETTINGS);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { token:'', repo:'', branch:'main' };
+}
+function saveSettings(s){
+  localStorage.setItem(LS_SETTINGS, JSON.stringify(s));
+}
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function daysBetween(a,b){
+  const d1 = new Date(a+'T00:00:00');
+  const d2 = new Date(b+'T00:00:00');
+  return Math.round((d2-d1)/86400000);
+}
+
+/* ---------- 상태 계산 ---------- */
+function lastCompletion(taskId){
+  const list = state.completions.filter(c=>c.taskId===taskId).sort((a,b)=>b.date.localeCompare(a.date));
+  return list.length ? list[0].date : null;
+}
+function taskStatus(task){
+  const last = lastCompletion(task.id);
+  if(!last) return { status:'never', ratio:1, daysSince:null, nextDue:null };
+  const daysSince = daysBetween(last, todayStr());
+  const ratio = daysSince / task.intervalDays;
+  let status = 'ok';
+  if(ratio >= 1) status = 'overdue';
+  else if(ratio >= 0.75) status = 'soon';
+  const nextDue = addDays(last, task.intervalDays);
+  return { status, ratio, daysSince, nextDue, last };
+}
+function addDays(dateStr, n){
+  const d = new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+n);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function fmtDate(s){
+  if(!s) return '-';
+  const [y,m,d] = s.split('-');
+  return `${y}.${m}.${d}`;
+}
+function intervalLabel(days){
+  if(days % 30 === 0 && days >= 30) return (days/30)+'개월마다';
+  if(days % 7 === 0 && days >= 7) return (days/7)+'주마다';
+  return days+'일마다';
+}
+
+/* ---------- 렌더 ---------- */
+function render(){
+  document.getElementById('todayLabel').textContent = todayStr().replaceAll('-','.') + ' 기준';
+
+  const cats = Array.from(new Set(state.tasks.map(t=>t.category).filter(Boolean)));
+  const filterRow = document.getElementById('filterRow');
+  filterRow.innerHTML = '';
+  const chips = [['all','전체'], ['overdue','기한초과'], ['soon','곧'], ...cats.map(c=>[c,c])];
+  chips.forEach(([key,label])=>{
+    const el = document.createElement('div');
+    el.className = 'filter-chip' + (currentFilter===key ? ' active' : '');
+    el.textContent = label;
+    el.onclick = ()=>{ currentFilter = key; render(); };
+    filterRow.appendChild(el);
+  });
+
+  let overdueN=0, soonN=0, okN=0;
+  state.tasks.forEach(t=>{
+    const s = taskStatus(t).status;
+    if(s==='overdue') overdueN++;
+    else if(s==='soon') soonN++;
+    else if(s==='ok') okN++;
+  });
+  document.getElementById('statsStrip').innerHTML = `
+    <div class="stat-chip overdue"><div class="n">${overdueN}</div><div class="l">기한초과</div></div>
+    <div class="stat-chip soon"><div class="n">${soonN}</div><div class="l">곧 해야함</div></div>
+    <div class="stat-chip ok"><div class="n">${okN}</div><div class="l">여유있음</div></div>
+  `;
+
+  let list = state.tasks.slice();
+  if(currentFilter==='overdue') list = list.filter(t=>taskStatus(t).status==='overdue');
+  else if(currentFilter==='soon') list = list.filter(t=>taskStatus(t).status==='soon');
+  else if(currentFilter!=='all') list = list.filter(t=>t.category===currentFilter);
+
+  list.sort((a,b)=> taskStatus(b).ratio - taskStatus(a).ratio);
+
+  const container = document.getElementById('taskList');
+  container.innerHTML = '';
+
+  if(list.length===0){
+    container.innerHTML = `<div class="empty"><b>기록된 항목이 없어요</b>오른쪽 아래 + 버튼을 눌러<br>반복해야 할 집안일을 등록해보세요.</div>`;
+    return;
+  }
+
+  list.forEach(t=>{
+    const st = taskStatus(t);
+    const card = document.createElement('div');
+    card.className = 'task-card' + (st.status==='overdue' ? ' overdue' : '');
+
+    const badgeText = {
+      never:'기록없음', overdue:'기한초과', soon:'곧', ok:'여유'
+    }[st.status];
+
+    const pct = st.status==='never' ? 6 : Math.min(100, Math.round(st.ratio*100));
+
+    const metaLeft = st.last ? `최근 ${fmtDate(st.last)} · ${st.daysSince}일 지남` : '아직 기록 없음';
+    const metaRight = st.nextDue ? `다음 ${fmtDate(st.nextDue)}` : intervalLabel(t.intervalDays);
+
+    card.innerHTML = `
+      <div class="task-top">
+        <div>
+          <div class="task-name">${escapeHtml(t.name)}</div>
+          ${t.category ? `<div class="task-cat">${escapeHtml(t.category)}</div>` : ''}
+        </div>
+        <div class="status-badge ${st.status}">${badgeText}</div>
+      </div>
+      <div class="gauge"><div class="gauge-fill ${st.status==='never'?'soon':st.status}" style="width:${pct}%"></div></div>
+      <div class="task-meta"><span>${metaLeft}</span><span>${metaRight}</span></div>
+      <div class="task-actions">
+        <button class="btn btn-done" data-action="done" data-id="${t.id}">오늘 완료</button>
+        <button class="btn btn-hist" data-action="hist" data-id="${t.id}">≡</button>
+        <button class="btn btn-hist" data-action="edit" data-id="${t.id}">✎</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- 이벤트 ---------- */
+document.getElementById('taskList').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-action]');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  if(action==='done') markDoneToday(id, btn);
+  else if(action==='hist') openHistory(id);
+  else if(action==='edit') openTaskSheet(id);
+});
+
+function markDoneToday(taskId, btnEl){
+  state.completions.push({ id: uid(), taskId, date: todayStr() });
+  saveLocal();
+  render();
+  flashStamp();
+  syncToGitHubDebounced();
+}
+
+function flashStamp(){
+  const holder = document.getElementById('stampFlash');
+  const mark = document.createElement('div');
+  mark.className = 'mark';
+  mark.textContent = '완료 기록됨';
+  holder.innerHTML = '';
+  holder.appendChild(mark);
+  setTimeout(()=>{ holder.innerHTML=''; }, 550);
+}
+
+/* ---------- 항목 추가/수정 시트 ---------- */
+document.getElementById('addFab').onclick = ()=> openTaskSheet(null);
+
+function openTaskSheet(taskId){
+  editingTaskId = taskId;
+  const overlay = document.getElementById('taskOverlay');
+  if(taskId){
+    const t = state.tasks.find(x=>x.id===taskId);
+    document.getElementById('taskSheetTitle').textContent = '항목 수정';
+    document.getElementById('f_name').value = t.name;
+    document.getElementById('f_cat').value = t.category || '';
+    document.getElementById('f_memo').value = t.memo || '';
+    // interval unit 추정
+    let unit = 1, val = t.intervalDays;
+    if(t.intervalDays % 30 === 0){ unit = 30; val = t.intervalDays/30; }
+    else if(t.intervalDays % 7 === 0){ unit = 7; val = t.intervalDays/7; }
+    document.getElementById('f_interval').value = val;
+    setUnit(unit);
+    document.getElementById('deleteTaskRow').style.display = 'flex';
+  } else {
+    document.getElementById('taskSheetTitle').textContent = '새 항목';
+    document.getElementById('f_name').value = '';
+    document.getElementById('f_cat').value = '';
+    document.getElementById('f_memo').value = '';
+    document.getElementById('f_interval').value = 2;
+    setUnit(7);
+    document.getElementById('deleteTaskRow').style.display = 'none';
+  }
+  overlay.classList.add('show');
+}
+function setUnit(days){
+  intervalUnit = days;
+  document.querySelectorAll('.unit-btn').forEach(b=>{
+    b.classList.toggle('active', Number(b.dataset.unit)===days);
+  });
+}
+document.querySelectorAll('.unit-btn').forEach(b=>{
+  b.onclick = ()=> setUnit(Number(b.dataset.unit));
+});
+
+document.getElementById('saveTaskBtn').onclick = ()=>{
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ alert('이름을 입력해주세요'); return; }
+  const val = Math.max(1, parseInt(document.getElementById('f_interval').value || '1', 10));
+  const intervalDays = val * intervalUnit;
+  const category = document.getElementById('f_cat').value.trim();
+  const memo = document.getElementById('f_memo').value.trim();
+
+  if(editingTaskId){
+    const t = state.tasks.find(x=>x.id===editingTaskId);
+    t.name = name; t.category = category; t.memo = memo; t.intervalDays = intervalDays;
+  } else {
+    state.tasks.push({ id: uid(), name, category, memo, intervalDays, createdAt: todayStr() });
+  }
+  saveLocal();
+  closeOverlay('taskOverlay');
+  render();
+  syncToGitHubDebounced();
+};
+
+document.getElementById('deleteTaskBtn').onclick = ()=>{
+  if(!confirm('이 항목과 관련된 이력도 함께 삭제됩니다. 삭제할까요?')) return;
+  state.tasks = state.tasks.filter(t=>t.id!==editingTaskId);
+  state.completions = state.completions.filter(c=>c.taskId!==editingTaskId);
+  saveLocal();
+  closeOverlay('taskOverlay');
+  render();
+  syncToGitHubDebounced();
+};
+
+/* ---------- 이력 시트 ---------- */
+function openHistory(taskId){
+  historyTaskId = taskId;
+  const t = state.tasks.find(x=>x.id===taskId);
+  document.getElementById('histSheetTitle').textContent = t.name + ' · 이력';
+  document.getElementById('f_histdate').value = todayStr();
+  renderHistory();
+  document.getElementById('histOverlay').classList.add('show');
+}
+function renderHistory(){
+  const list = state.completions.filter(c=>c.taskId===historyTaskId).sort((a,b)=>b.date.localeCompare(a.date));
+
+  let gaps = [];
+  for(let i=0;i<list.length-1;i++){
+    gaps.push(daysBetween(list[i+1].date, list[i].date));
+  }
+  const avgGap = gaps.length ? Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length) : null;
+
+  document.getElementById('histSummary').innerHTML = `
+    <div class="box"><div class="n">${list.length}</div><div class="l">총 기록</div></div>
+    <div class="box"><div class="n">${avgGap ?? '-'}</div><div class="l">평균 간격(일)</div></div>
+    <div class="box"><div class="n">${list.length ? fmtDate(list[0].date) : '-'}</div><div class="l">최근 완료</div></div>
+  `;
+
+  const histList = document.getElementById('histList');
+  if(list.length===0){
+    histList.innerHTML = `<div class="empty" style="padding:24px 0;">아직 기록이 없어요</div>`;
+    return;
+  }
+  histList.innerHTML = list.map(c=>`
+    <div class="hist-item">
+      <span>${fmtDate(c.date)}</span>
+      <span class="hist-del" data-cid="${c.id}">삭제</span>
+    </div>
+  `).join('');
+}
+document.getElementById('histList').addEventListener('click', (e)=>{
+  const el = e.target.closest('.hist-del');
+  if(!el) return;
+  state.completions = state.completions.filter(c=>c.id!==el.dataset.cid);
+  saveLocal();
+  renderHistory();
+  render();
+  syncToGitHubDebounced();
+});
+document.getElementById('addHistBtn').onclick = ()=>{
+  const date = document.getElementById('f_histdate').value;
+  if(!date) return;
+  state.completions.push({ id: uid(), taskId: historyTaskId, date });
+  saveLocal();
+  renderHistory();
+  render();
+  syncToGitHubDebounced();
+};
+
+/* ---------- 시트 공통 ---------- */
+document.querySelectorAll('[data-close]').forEach(el=>{
+  el.addEventListener('click', ()=> closeOverlay(el.dataset.close));
+});
+document.querySelectorAll('.overlay').forEach(ov=>{
+  ov.addEventListener('click', (e)=>{ if(e.target===ov) closeOverlay(ov.id); });
+});
+function closeOverlay(id){ document.getElementById(id).classList.remove('show'); }
+
+/* ---------- 설정 / GitHub 동기화 ---------- */
+document.getElementById('settingsBtn').onclick = ()=>{
+  const s = loadSettings();
+  document.getElementById('s_token').value = s.token || '';
+  document.getElementById('s_repo').value = s.repo || '';
+  document.getElementById('s_branch').value = s.branch || 'main';
+  document.getElementById('syncStatus').textContent = '';
+  document.getElementById('settingsOverlay').classList.add('show');
+};
+
+function currentSettingsFromForm(){
+  return {
+    token: document.getElementById('s_token').value.trim(),
+    repo: document.getElementById('s_repo').value.trim(),
+    branch: document.getElementById('s_branch').value.trim() || 'main'
+  };
+}
+
+async function githubGetFile(s){
+  const url = `https://api.github.com/repos/${s.repo}/contents/data.json?ref=${encodeURIComponent(s.branch)}`;
+  const res = await fetch(url, { headers: { 'Authorization': `token ${s.token}`, 'Accept':'application/vnd.github+json' } });
+  if(res.status===404) return { exists:false, sha:null, data:null };
+  if(!res.ok) throw new Error('불러오기 실패 ('+res.status+')');
+  const json = await res.json();
+  const content = decodeURIComponent(escape(atob(json.content.replace(/\n/g,''))));
+  return { exists:true, sha: json.sha, data: JSON.parse(content) };
+}
+async function githubPutFile(s, dataObj, sha){
+  const url = `https://api.github.com/repos/${s.repo}/contents/data.json`;
+  const body = {
+    message: '정비일지 업데이트 ' + new Date().toISOString(),
+    content: btoa(unescape(encodeURIComponent(JSON.stringify(dataObj, null, 2)))),
+    branch: s.branch
+  };
+  if(sha) body.sha = sha;
+  const res = await fetch(url, {
+    method:'PUT',
+    headers: { 'Authorization': `token ${s.token}`, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){ const t = await res.text(); throw new Error('저장 실패 ('+res.status+') '+t); }
+  return res.json();
+}
+
+document.getElementById('testSyncBtn').onclick = async ()=>{
+  const s = currentSettingsFromForm();
+  const statusEl = document.getElementById('syncStatus');
+  statusEl.className = 'sync-status';
+  statusEl.textContent = '연결 확인 중...';
+  try{
+    const remote = await githubGetFile(s);
+    saveSettings(s);
+    if(!remote.exists){
+      await githubPutFile(s, state, null);
+      statusEl.textContent = '연결 성공 · 새 데이터 파일 생성됨';
+    } else {
+      statusEl.textContent = '연결 성공 · 저장소 확인됨';
+    }
+    statusEl.classList.add('ok');
+  }catch(err){
+    statusEl.textContent = String(err.message || err);
+    statusEl.classList.add('err');
+  }
+};
+
+document.getElementById('pullSyncBtn').onclick = async ()=>{
+  const s = loadSettings();
+  const statusEl = document.getElementById('syncStatus');
+  if(!s.token || !s.repo){ statusEl.textContent='먼저 토큰/저장소를 저장해주세요'; statusEl.className='sync-status err'; return; }
+  statusEl.className = 'sync-status';
+  statusEl.textContent = '불러오는 중...';
+  try{
+    const remote = await githubGetFile(s);
+    if(remote.exists && remote.data){
+      state = remote.data;
+      saveLocal();
+      render();
+      statusEl.textContent = '최신 데이터를 불러왔어요';
+      statusEl.classList.add('ok');
+    } else {
+      statusEl.textContent = '원격에 저장된 데이터가 없어요';
+    }
+  }catch(err){
+    statusEl.textContent = String(err.message || err);
+    statusEl.classList.add('err');
+  }
+};
+
+let syncTimer = null;
+function syncToGitHubDebounced(){
+  const s = loadSettings();
+  if(!s.token || !s.repo) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async ()=>{
+    try{
+      const remote = await githubGetFile(s);
+      await githubPutFile(s, state, remote.exists ? remote.sha : null);
+    }catch(err){
+      console.warn('sync failed', err);
+    }
+  }, 1200);
+}
+
+/* ---------- 초기 로드: 원격 데이터 있으면 자동 불러오기 ---------- */
+(async function initSync(){
+  const s = loadSettings();
+  if(!s.token || !s.repo) return;
+  try{
+    const remote = await githubGetFile(s);
+    if(remote.exists && remote.data){
+      state = remote.data;
+      saveLocal();
+      render();
+    }
+  }catch(e){ /* 조용히 무시, 로컬 데이터로 계속 */ }
+})();
+
+/* ---------- PWA ---------- */
+if('serviceWorker' in navigator){
+  const swCode = `
+    self.addEventListener('fetch', e=>{});
+  `;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+
+render();
+</script>
+</body>
+</html>
