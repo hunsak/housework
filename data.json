@@ -55,6 +55,14 @@
       "memo": "",
       "intervalDays": 360,
       "createdAt": "2026-08-15"
+    },
+    {
+      "id": "msu3xsod07hpf",
+      "name": "카메라충전",
+      "category": "",
+      "memo": "",
+      "intervalDays": 30,
+      "createdAt": "2026-08-15"
     }
   ],
   "completions": [
