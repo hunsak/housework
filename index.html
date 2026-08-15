@@ -71,12 +71,18 @@
   .stat-chip{
     flex:1;background:var(--surface);border:1px solid var(--border);
     border-radius:10px;padding:9px 10px;text-align:center;
+    cursor:pointer;user-select:none;transition:background .15s,border-color .15s;
   }
+  .stat-chip:active{opacity:0.85;}
   .stat-chip .n{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
   .stat-chip .l{font-size:10px;color:var(--text-muted);margin-top:2px;}
   .stat-chip.overdue .n{color:var(--rust);}
   .stat-chip.soon .n{color:var(--brass);}
   .stat-chip.ok .n{color:var(--sage);}
+  .stat-chip.overdue.active{background:rgba(181,83,60,0.22);border-color:var(--rust);}
+  .stat-chip.soon.active{background:rgba(201,162,39,0.22);border-color:var(--brass);}
+  .stat-chip.ok.active{background:rgba(107,143,113,0.22);border-color:var(--sage);}
+  .stat-chip.active .l{color:var(--text);}
 
   .filter-row{
     display:flex;gap:6px;overflow-x:auto;margin:14px 0 4px;padding-bottom:2px;
@@ -398,7 +404,7 @@ function render(){
   const cats = Array.from(new Set(state.tasks.map(t=>t.category).filter(Boolean)));
   const filterRow = document.getElementById('filterRow');
   filterRow.innerHTML = '';
-  const chips = [['all','전체'], ['overdue','기한초과'], ['soon','곧'], ...cats.map(c=>[c,c])];
+  const chips = [['all','전체'], ...cats.map(c=>[c,c])];
   chips.forEach(([key,label])=>{
     const el = document.createElement('div');
     el.className = 'filter-chip' + (currentFilter===key ? ' active' : '');
@@ -415,14 +421,22 @@ function render(){
     else if(s==='ok') okN++;
   });
   document.getElementById('statsStrip').innerHTML = `
-    <div class="stat-chip overdue"><div class="n">${overdueN}</div><div class="l">기한초과</div></div>
-    <div class="stat-chip soon"><div class="n">${soonN}</div><div class="l">곧 해야함</div></div>
-    <div class="stat-chip ok"><div class="n">${okN}</div><div class="l">여유있음</div></div>
+    <div class="stat-chip overdue${currentFilter==='overdue' ? ' active' : ''}" data-status="overdue"><div class="n">${overdueN}</div><div class="l">기한초과</div></div>
+    <div class="stat-chip soon${currentFilter==='soon' ? ' active' : ''}" data-status="soon"><div class="n">${soonN}</div><div class="l">곧 해야함</div></div>
+    <div class="stat-chip ok${currentFilter==='ok' ? ' active' : ''}" data-status="ok"><div class="n">${okN}</div><div class="l">여유있음</div></div>
   `;
+  document.querySelectorAll('.stat-chip').forEach(el=>{
+    el.onclick = ()=>{
+      const key = el.dataset.status;
+      currentFilter = (currentFilter === key) ? 'all' : key;
+      render();
+    };
+  });
 
   let list = state.tasks.slice();
   if(currentFilter==='overdue') list = list.filter(t=>taskStatus(t).status==='overdue');
   else if(currentFilter==='soon') list = list.filter(t=>taskStatus(t).status==='soon');
+  else if(currentFilter==='ok') list = list.filter(t=>taskStatus(t).status==='ok');
   else if(currentFilter!=='all') list = list.filter(t=>t.category===currentFilter);
 
   list.sort((a,b)=> taskStatus(b).ratio - taskStatus(a).ratio);
