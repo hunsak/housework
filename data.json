@@ -71,6 +71,14 @@
       "memo": "",
       "intervalDays": 90,
       "createdAt": "2026-08-17"
+    },
+    {
+      "id": "msx3phq99kjvb",
+      "name": "공유기 펌웨어 업데이트",
+      "category": "",
+      "memo": "",
+      "intervalDays": 90,
+      "createdAt": "2026-08-17"
     }
   ],
   "completions": [
@@ -82,6 +90,11 @@
     {
       "id": "msww0bzr9fa02",
       "taskId": "mst39txy4sdbk",
+      "date": "2026-08-17"
+    },
+    {
+      "id": "msx3pxbbz40p7",
+      "taskId": "mst391cnxf8z5",
       "date": "2026-08-17"
     }
   ]
