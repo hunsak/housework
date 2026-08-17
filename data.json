@@ -63,6 +63,14 @@
       "memo": "",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
+    },
+    {
+      "id": "msx3p2omx74cv",
+      "name": "도어락 펌웨어 업데이트",
+      "category": "",
+      "memo": "",
+      "intervalDays": 90,
+      "createdAt": "2026-08-17"
     }
   ],
   "completions": [
