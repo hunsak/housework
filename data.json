@@ -3,7 +3,7 @@
     {
       "id": "mst391cnxf8z5",
       "name": "세탁기 세탁조청소,통살균",
-      "category": "",
+      "category": "세탁기",
       "memo": "",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
@@ -35,7 +35,7 @@
     {
       "id": "mst3bacoaorfv",
       "name": "칫솔소독기 충전",
-      "category": "",
+      "category": "칫솔소독기",
       "memo": "",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
