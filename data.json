@@ -87,6 +87,14 @@
       "memo": "브러시부분 나사로 빼서 말려있는 머리카락 빼기",
       "intervalDays": 30,
       "createdAt": "2026-08-22"
+    },
+    {
+      "id": "mtm6sv3i3y2ry",
+      "name": "화장실 청소",
+      "category": "청소",
+      "memo": "",
+      "intervalDays": 90,
+      "createdAt": "2026-09-04"
     }
   ],
   "completions": [
