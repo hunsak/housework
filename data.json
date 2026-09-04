@@ -95,6 +95,14 @@
       "memo": "",
       "intervalDays": 90,
       "createdAt": "2026-09-04"
+    },
+    {
+      "id": "mtm6tbvqr29ws",
+      "name": "베란다청소",
+      "category": "청소",
+      "memo": "",
+      "intervalDays": 180,
+      "createdAt": "2026-09-04"
     }
   ],
   "completions": [
