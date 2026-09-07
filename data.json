@@ -3,7 +3,7 @@
     {
       "id": "mst391cnxf8z5",
       "name": "세탁기 세탁조청소,통살균",
-      "category": "세탁기",
+      "category": "세탁/식세기",
       "memo": "",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
@@ -11,7 +11,7 @@
     {
       "id": "mst39txy4sdbk",
       "name": "식세기 통살균",
-      "category": "",
+      "category": "세탁/식세기",
       "memo": "과탄산소다 만 사용",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
@@ -75,7 +75,7 @@
     {
       "id": "msx3phq99kjvb",
       "name": "공유기 펌웨어 업데이트",
-      "category": "공유기",
+      "category": "펌웨어",
       "memo": "",
       "intervalDays": 90,
       "createdAt": "2026-08-17"
