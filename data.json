@@ -35,7 +35,7 @@
     {
       "id": "mst3bacoaorfv",
       "name": "칫솔소독기 충전",
-      "category": "칫솔소독기",
+      "category": "충전",
       "memo": "",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
@@ -43,7 +43,7 @@
     {
       "id": "mst3c3ib8s8ay",
       "name": "휴지통 충전",
-      "category": "",
+      "category": "충전",
       "memo": "",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
@@ -51,7 +51,7 @@
     {
       "id": "mst3chzl4q1g1",
       "name": "도어락 베터리교체",
-      "category": "",
+      "category": "충전",
       "memo": "",
       "intervalDays": 360,
       "createdAt": "2026-08-15"
@@ -59,7 +59,7 @@
     {
       "id": "msu3xsod07hpf",
       "name": "카메라충전",
-      "category": "",
+      "category": "충전",
       "memo": "",
       "intervalDays": 30,
       "createdAt": "2026-08-15"
@@ -67,7 +67,7 @@
     {
       "id": "msx3p2omx74cv",
       "name": "도어락 펌웨어 업데이트",
-      "category": "",
+      "category": "펌웨어",
       "memo": "",
       "intervalDays": 90,
       "createdAt": "2026-08-17"
