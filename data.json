@@ -103,6 +103,14 @@
       "memo": "",
       "intervalDays": 180,
       "createdAt": "2026-09-04"
+    },
+    {
+      "id": "mtr4fkf21rx42",
+      "name": "엄마네 공유기업데이트",
+      "category": "펌웨어",
+      "memo": "",
+      "intervalDays": 60,
+      "createdAt": "2026-09-07"
     }
   ],
   "completions": [
