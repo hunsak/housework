@@ -111,6 +111,14 @@
       "memo": "",
       "intervalDays": 60,
       "createdAt": "2026-09-07"
+    },
+    {
+      "id": "mu7v24hd8harb",
+      "name": "처갓집 공유기업데이트",
+      "category": "펌웨어",
+      "memo": "",
+      "intervalDays": 90,
+      "createdAt": "2026-09-19"
     }
   ],
   "completions": [
