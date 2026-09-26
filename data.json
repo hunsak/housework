@@ -61,7 +61,7 @@
       "name": "카메라충전",
       "category": "충전",
       "memo": "",
-      "intervalDays": 30,
+      "intervalDays": 60,
       "createdAt": "2026-08-15"
     },
     {
